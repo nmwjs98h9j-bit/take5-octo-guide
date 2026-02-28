@@ -1,0 +1,7 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "python3.11 -m gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 2"
+healthcheckPath = "/api/status"
+restartPolicyType = "on_failure"
