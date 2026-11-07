@@ -1,6 +1,6 @@
 # Fund Radar — backend snapshot
 
-An earlier Flask backend for collecting fund leads from public search results, NFA pages and RSS headlines. For the version with a browser dashboard, see [Fund Radar](https://github.com/nmwjs98h9j-bit/take6-octo-guide).
+An earlier Flask backend for collecting fund leads from public search results, NFA pages and RSS headlines. For the version with a browser dashboard, see [Fund Radar](https://github.com/nmwjs98h9j-bit/fund-radar).
 
 ## Run the API
 
