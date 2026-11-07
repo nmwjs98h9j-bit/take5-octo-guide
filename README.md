@@ -1,79 +1,22 @@
-# Macro/CTA Fund Radar
+# Fund Radar — backend snapshot
 
-Automated dashboard that monitors SEC EDGAR, NFA BASIC, and news RSS feeds for new macro/CTA fund launches. Refreshes every 60 minutes automatically.
+An earlier Flask backend for collecting fund leads from public search results, NFA pages and RSS headlines. For the version with a browser dashboard, see [Fund Radar](https://github.com/nmwjs98h9j-bit/take6-octo-guide).
 
----
+## Run the API
 
-## What it does
+Use Python 3.11 and an isolated environment:
 
-- **SEC EDGAR** — queries Form ADV filings for new investment adviser registrations matching macro/CTA keywords
-- **NFA BASIC** — scrapes CTA/CPO registrations
-- **News feeds** — monitors Hedgeweek, Hedge Fund Journal, HedgeNordic, Institutional Investor RSS for launch announcements
-- Deduplicates and merges results, persists to JSON, serves via REST API
-- Dashboard auto-refreshes every 15 minutes from the API
-
----
-
-## Run locally
-
-```bash
-pip install -r requirements.txt
+```sh
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 python app.py
-# Open http://localhost:5000
 ```
 
----
+The API listens on port 5000. Available routes are `GET /api/funds`, `GET /api/news`, `GET /api/status` and `POST /api/refresh`.
 
-## Deploy (free, always-on)
+This snapshot does not include `static/index.html`, so its root dashboard route cannot serve a page. Data is cached as JSON under `data/`, configurable through `DATA_DIR`.
 
-### Option A — Railway (recommended, ~2 min setup)
-1. Push this folder to a GitHub repo
-2. Go to railway.app → New Project → Deploy from GitHub
-3. Select the repo — Railway auto-detects the Procfile
-4. Done. You get a public URL like `https://fund-radar-xxx.railway.app`
+## Behaviour and limits
 
-### Option B — Render
-1. Push to GitHub
-2. render.com → New Web Service → connect repo
-3. Build command: `pip install -r requirements.txt`
-4. Start command: `gunicorn app:app --bind 0.0.0.0:$PORT --workers 1`
-5. Done.
-
-### Option C — Fly.io
-```bash
-brew install flyctl
-flyctl auth login
-flyctl launch   # follow prompts
-flyctl deploy
-```
-
----
-
-## API endpoints
-
-| Endpoint | Description |
-|---|---|
-| `GET /api/funds` | All detected funds (JSON) |
-| `GET /api/news` | News signal feed (JSON) |
-| `GET /api/status` | Source status + last run time |
-| `POST /api/refresh` | Trigger immediate scrape |
-
----
-
-## Customise
-
-Edit `app.py` to adjust:
-- `REFRESH_INTERVAL_MINUTES` — how often to scrape (default: 60)
-- `MACRO_KEYWORDS` — keywords used to filter EDGAR results
-- `SEED_FUNDS` — baseline fund list always shown
-
-To add more news sources, append to the `feeds` list in `scrape_news()`.
-
----
-
-## Notes
-
-- SEC EDGAR and NFA have rate limits — the scraper uses polite delays
-- NFA blocks direct API calls; the scraper uses their public HTML pages
-- Bloomberg/Hedgeweek paywalled content won't be scraped — RSS headlines only
-- All data is stored in `data/funds.json` and `data/news.json` (persists across restarts)
+Direct execution starts hourly collection. Gunicorn imports `app:app` without starting that scheduler. Collection is best-effort; bundled records and figures are sample content, not verified live data. The refresh route has no access control, and concurrent JSON writes are not coordinated. Keep this snapshot for reference rather than treating it as a complete deployment.
